@@ -134,6 +134,9 @@
             
             // Position slightly above ground
             model.position.y += 2;
+
+            // Flip the model upside - down by rotating it 180 degrees around the X - axis
+            model.rotation.x = Math.PI;
             
             scene.add(model);
             hideLoading();
@@ -154,7 +157,7 @@
             
         }, (progress) => {
             // Show loading progress
-            const percent = ((progress.loaded / progress.total) * 100).toFixed(0);
+            const percent = (progress.loaded / progress.total * 100).toFixed(0);
             loadingMessage.textContent = `Loading model: ${percent}%`;
         }, (error) => {
             hideLoading();
