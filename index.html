@@ -146,20 +146,20 @@
             });
 
             // Place the camera inside the model with 90-degree rotation and forward movement
-            const forwardDistance = 1.5; // 向前移动的距离
+            const forwardDistance = 10; // 向前移动的距离
             camera.position.copy(center).multiplyScalar(scale);
             
             // 调整相机位置：向前移动（沿Z轴负方向）
             camera.position.z -= forwardDistance * scale;
             
             // 顺时针旋转90度（绕Y轴）
-            camera.rotation.y = Math.PI / 2;
+            camera.rotation.y = Math.PI;
             
             // 保持相机高度在地面以上
-            camera.position.y += 0.5;
+            camera.position.y += 1.0;
             
             // 让相机看向模型中心
-            camera.lookAt(center.multiplyScalar(scale));
+            //camera.lookAt(center.multiplyScalar(scale));
             
         }, (progress) => {
             // Show loading progress
