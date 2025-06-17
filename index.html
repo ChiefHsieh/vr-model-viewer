@@ -128,8 +128,8 @@
             // Position and scale model
             model.position.sub(center); // Center model
             
-            //const maxDim = Math.max(size.x, size.y, size.z);
-            //const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
             // Position slightly above ground
