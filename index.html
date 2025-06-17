@@ -130,10 +130,10 @@
             
             //const maxDim = Math.max(size.x, size.y, size.z);
             //const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
-            //model.scale.set(scale, scale, scale);
+            model.scale.set(scale, scale, scale);
             
             // Position slightly above ground
-            model.position.y += 0.5;
+            model.position.y += 10;
             
             scene.add(model);
             hideLoading();
