@@ -69,7 +69,6 @@
 
         // Camera setup
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 0);
 
         // Renderer setup
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -146,13 +145,12 @@
                 }
             });
 
-            // Adjust camera height to match model's center (NEW)
-            camera.position.y = center.y * scale + 0.5; // Add 0.5 offset to keep camera above ground
-    
-            // Position camera to frame the model (NEW)
-            const offset = new THREE.Vector3(0, 0, Math.max(size.x, size.z) * scale * 1.5);
-            camera.position.add(offset);
-            camera.lookAt(0, center.y * scale + 3.0, 0); // Look at model's center
+            // Place the camera inside the model
+            camera.position.copy(center).multiplyScalar(scale);
+            camera.position.y += 0.5; // Add a small offset to keep the camera above the ground
+
+            // Make the camera look at the center of the model
+            camera.lookAt(center.multiplyScalar(scale));
             
         }, (progress) => {
             // Show loading progress
