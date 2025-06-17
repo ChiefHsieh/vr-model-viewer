@@ -129,11 +129,11 @@
             model.position.sub(center); // Center model
             
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = Math.min(15 / maxDim, 1); // Ensure model fits in view
+            const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
             // Position slightly above ground
-            model.position.y += 1;
+            model.position.y += 0.5;
             
             scene.add(model);
             hideLoading();
@@ -145,21 +145,12 @@
                 }
             });
 
-            // Place the camera inside the model with 90-degree rotation and forward movement
-            const forwardDistance = 10; // 向前移动的距离
+            // Place the camera inside the model
             camera.position.copy(center).multiplyScalar(scale);
-            
-            // 调整相机位置：向前移动（沿Z轴负方向）
-            camera.position.z -= forwardDistance * scale;
-            
-            // 顺时针旋转90度（绕Y轴）
-            camera.rotation.z = Math.PI / 2;
-            
-            // 保持相机高度在地面以上
-            camera.position.y += 1.0;
-            
-            // 让相机看向模型中心
-            //camera.lookAt(center.multiplyScalar(scale));
+            camera.position.y += 0.5; // Add a small offset to keep the camera above the ground
+
+            // Make the camera look at the center of the model
+            camera.lookAt(center.multiplyScalar(scale));
             
         }, (progress) => {
             // Show loading progress
