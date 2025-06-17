@@ -154,7 +154,7 @@
             
         }, (progress) => {
             // Show loading progress
-            const percent = (progress.loaded / progress.total * 100).toFixed(0);
+            const percent = ((progress.loaded / progress.total) * 100).toFixed(0);
             loadingMessage.textContent = `Loading model: ${percent}%`;
         }, (error) => {
             hideLoading();
@@ -189,36 +189,9 @@
             vrButton.disabled = true;
         });
 
-        // Movement speed
-        const movementSpeed = 0.1;
-
         // Animation loop
         function animate() {
             renderer.setAnimationLoop(() => {
-                const xrSession = renderer.xr.getSession();
-                if (xrSession) {
-                    xrSession.inputSources.forEach((inputSource) => {
-                        if (inputSource.gamepad) {
-                            const gamepad = inputSource.gamepad;
-                            const forwardBackward = gamepad.axes[1];
-
-                            if (Math.abs(forwardBackward) > 0.1) {
-                                const direction = new THREE.Vector3();
-                                camera.getWorldDirection(direction);
-                                direction.y = 0; // Keep movement on the ground plane
-                                direction.normalize();
-
-                                if (forwardBackward < 0) {
-                                    // Move forward
-                                    camera.position.addScaledVector(direction, movementSpeed);
-                                } else {
-                                    // Move backward
-                                    camera.position.addScaledVector(direction, -movementSpeed);
-                                }
-                            }
-                        }
-                    });
-                }
                 renderer.render(scene, camera);
             });
         }
