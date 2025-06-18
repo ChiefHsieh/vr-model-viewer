@@ -193,11 +193,49 @@
             vrButton.disabled = true;
         });
 
+        // Movement speed
+        const movementSpeed = 0.1;
+
         // Animation loop
         function animate() {
-            renderer.setAnimationLoop(() => {
-                renderer.render(scene, camera);
-            });
+            requestAnimationFrame(animate);
+
+            const session = renderer.xr.getSession();
+            if (session) {
+                session.inputSources.forEach((inputSource) => {
+                    if (inputSource.gamepad) {
+                        const gamepad = inputSource.gamepad;
+                        const axes = gamepad.axes;
+
+                        // Check for movement input on the thumbstick
+                        const forwardBackward = axes[1];
+                        const leftRight = axes[0];
+
+                        if (Math.abs(forwardBackward) > 0.1 || Math.abs(leftRight) > 0.1) {
+                            const direction = new THREE.Vector3();
+                            camera.getWorldDirection(direction);
+
+                            // Move forward/backward
+                            if (forwardBackward < 0) {
+                                camera.position.add(direction.multiplyScalar(movementSpeed));
+                            } else if (forwardBackward > 0) {
+                                camera.position.sub(direction.multiplyScalar(movementSpeed));
+                            }
+
+                            // Move left/right
+                            const sideDirection = new THREE.Vector3();
+                            sideDirection.crossVectors(camera.up, direction).normalize();
+                            if (leftRight < 0) {
+                                camera.position.sub(sideDirection.multiplyScalar(movementSpeed));
+                            } else if (leftRight > 0) {
+                                camera.position.add(sideDirection.multiplyScalar(movementSpeed));
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
         }
         animate();
 
