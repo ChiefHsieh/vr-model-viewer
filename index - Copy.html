@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR Model Viewer</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #vr-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #error-message {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: red;
+            font-weight: bold;
+            background-color: rgba(0,0,0,0.7);
+            padding: 10px;
+            display: none;
+        }
+        #loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <button id="vr-button">Enter VR</button>
+    <div id="error-message"></div>
+    <div id="loading-message">Loading model...</div>
+
+    <script type="module">
+        // Import Three.js and GLTFLoader
+        import * as THREE from './js/three.module.min.js';
+        import { GLTFLoader } from './js/GLTFLoader.js';
+
+        // Error and loading handling
+        const errorMessage = document.getElementById('error-message');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            console.error(message);
+        }
+        
+        function hideLoading() {
+            loadingMessage.style.display = 'none';
+        }
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // Renderer setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Enable VR
+        renderer.xr.enabled = true;
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight.position.set(2, 5, 3);
+        scene.add(directionalLight);
+
+        // Add ground plane
+        const groundGeometry = new THREE.PlaneGeometry(10, 10);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        scene.add(ground);
+
+        // Add a helper object to mark origin (debugging)
+        const originMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        );
+        scene.add(originMarker);
+
+        // Load GLTF model with enhanced debugging
+        const loader = new GLTFLoader();
+        loader.load('models/model.glb', (gltf) => {
+            const model = gltf.scene;
+            
+            // Check if model has children
+            if (model.children.length === 0) {
+                showError('Model has no mesh objects');
+                return;
+            }
+            
+            // Compute model size and center
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            
+            console.log('Model size:', size);
+            console.log('Model center:', center);
+            
+            // If model is tiny or huge, it might be scaled incorrectly
+            if (size.length() < 0.01 || size.length() > 100) {
+                showError('Model scale is unusual. Try re-exporting from 3D software.');
+            }
+            
+            // Position and scale model
+            model.position.sub(center); // Center model
+            
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
+            model.scale.set(scale, scale, scale);
+            
+            // Position slightly above ground
+            model.position.y += 1;
+            model.position.x += 1;
+
+            // Flip the model upside - down by rotating it 180 degrees around the X - axis
+            model.rotation.x = Math.PI;
+            
+            scene.add(model);
+            hideLoading();
+            
+            // Debug: Log all mesh materials
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    console.log('Mesh material:', child.material);
+                }
+            });
+
+            // Place the camera inside the model
+            camera.position.copy(center).multiplyScalar(scale);
+            camera.position.y += 0.5; // Add a small offset to keep the camera above the ground
+
+            // Make the camera look at the center of the model
+            camera.lookAt(center.multiplyScalar(scale));
+            
+        }, (progress) => {
+            // Show loading progress
+            const percent = (progress.loaded / progress.total * 100).toFixed(0);
+            loadingMessage.textContent = `Loading model: ${percent}%`;
+        }, (error) => {
+            hideLoading();
+            showError(`Failed to load model: ${error.message}`);
+            console.error('Model loading error:', error);
+        });
+
+        // VR button
+        const vrButton = document.getElementById('vr-button');
+        
+        // Check WebXR support
+        navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+            if (supported) {
+                vrButton.addEventListener('click', async () => {
+                    try {
+                        const session = await navigator.xr.requestSession('immersive-vr', {
+                            optionalFeatures: ['local-floor', 'bounded-floor']
+                        });
+                        renderer.xr.setSession(session);
+                    } catch (error) {
+                        showError(`VR error: ${error.message}`);
+                        console.error(error);
+                    }
+                });
+            } else {
+                vrButton.textContent = 'VR Not Supported';
+                vrButton.disabled = true;
+            }
+        }).catch((error) => {
+            showError(`WebXR check failed: ${error.message}`);
+            vrButton.textContent = 'VR Not Supported';
+            vrButton.disabled = true;
+        });
+
+        // Animation loop
+        function animate() {
+            renderer.setAnimationLoop(() => {
+                renderer.render(scene, camera);
+            });
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
