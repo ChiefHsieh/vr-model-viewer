@@ -153,12 +153,9 @@
             const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
-            // Position slightly above ground
-            model.position.y += 1;
-            
-            // Flip the model upside - down by rotating it 180 degrees around the X - axis
-            // model.rotation.x = Math.PI; // Remove this line if causing orientation issues
-            
+            // Position at the origin
+            model.position.set(0, 0, 0);
+
             scene.add(model);
             hideLoading();
             
@@ -191,9 +188,7 @@
             if (supported) {
                 vrButton.addEventListener('click', async () => {
                     try {
-                        const session = await navigator.xr.requestSession('immersive-vr', {
-                            optionalFeatures: ['local-floor', 'bounded-floor']
-                        });
+                        const session = await navigator.xr.requestSession('immersive-vr');
                         renderer.xr.setSession(session);
 
                         // Movement settings
