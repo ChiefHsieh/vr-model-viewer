@@ -178,6 +178,43 @@
                             optionalFeatures: ['local-floor', 'bounded-floor']
                         });
                         renderer.xr.setSession(session);
+
+                        // Add movement controls
+                        const movementSpeed = 0.1;
+                        let movementVector = new THREE.Vector3();
+
+                        session.addEventListener('inputsourceschange', (event) => {
+                            const inputSources = session.inputSources;
+                            for (const inputSource of inputSources) {
+                                if (inputSource.gamepad) {
+                                    const gamepad = inputSource.gamepad;
+                                    const axes = gamepad.axes;
+                                    movementVector.set(axes[0], 0, -axes[1]);
+                                    movementVector.normalize().multiplyScalar(movementSpeed);
+                                }
+                            }
+                        });
+
+                        renderer.setAnimationLoop(() => {
+                            if (renderer.xr.isPresenting) {
+                                const currentPose = renderer.xr.getCamera(camera).position;
+                                const forward = new THREE.Vector3();
+                                camera.getWorldDirection(forward);
+                                forward.y = 0;
+                                forward.normalize();
+
+                                const right = new THREE.Vector3();
+                                right.crossVectors(camera.up, forward);
+
+                                const moveForward = forward.clone().multiplyScalar(movementVector.z);
+                                const moveRight = right.clone().multiplyScalar(movementVector.x);
+
+                                const newPosition = currentPose.clone().add(moveForward).add(moveRight);
+                                camera.position.copy(newPosition);
+                            }
+                            renderer.render(scene, camera);
+                        });
+
                     } catch (error) {
                         showError(`VR error: ${error.message}`);
                         console.error(error);
@@ -192,14 +229,6 @@
             vrButton.textContent = 'VR Not Supported';
             vrButton.disabled = true;
         });
-
-        // Animation loop
-        function animate() {
-            renderer.setAnimationLoop(() => {
-                renderer.render(scene, camera);
-            });
-        }
-        animate();
 
         // Handle window resize
         window.addEventListener('resize', () => {
