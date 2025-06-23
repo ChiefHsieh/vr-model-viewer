@@ -103,8 +103,9 @@
 
         // Load GLTF model with enhanced debugging
         const loader = new GLTFLoader();
+        let model; // Declare model variable outside the loader callback
         loader.load('models/model.glb', (gltf) => {
-            const model = gltf.scene;
+            model = gltf.scene;
             
             // Check if model has children
             if (model.children.length === 0) {
@@ -133,11 +134,14 @@
             model.scale.set(scale, scale, scale);
             
             // Position slightly above ground
-            model.position.y += 1;
+            model.position.y += 0.5; // Lower the model vertically by reducing the offset
             model.position.x += 1;
 
             // Flip the model upside - down by rotating it 180 degrees around the X - axis
             model.rotation.x = Math.PI;
+
+            // Rotate the model 180 degrees about the Y - axis
+            model.rotation.y = Math.PI;
             
             scene.add(model);
             hideLoading();
