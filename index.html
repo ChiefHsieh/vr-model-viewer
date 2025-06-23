@@ -133,9 +133,8 @@
             const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
-            // Position slightly above ground
-            model.position.y += 0.5; // Lower the model vertically by reducing the offset
-            model.position.x += 1;
+            // Position slightly above ground and move forward (negative Z-axis)
+            model.position.set(0, 0.5, -2); // Adjust Z value to move forward/backward
 
             // Flip the model upside - down by rotating it 180 degrees around the X - axis
             model.rotation.x = Math.PI;
