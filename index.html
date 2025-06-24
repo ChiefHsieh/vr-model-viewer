@@ -123,7 +123,7 @@
             
             // If model is tiny or huge, it might be scaled incorrectly
             if (size.length() < 0.01 || size.length() > 100) {
-                showError('Model scale is unusual. Try re-exporting from 3D software.');
+                showError('Model scale is unusual. Try re - exporting from 3D software.');
             }
             
             // Position and scale model
@@ -133,7 +133,7 @@
             const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
-            // Position slightly above ground and move forward (negative Z-axis)
+            // Position slightly above ground and move forward (negative Z - axis)
             //model.position.set(0, 0.5, -2); // Adjust Z value to move forward/backward
 
             // Flip the model upside - down by rotating it 180 degrees around the X - axis
@@ -152,12 +152,11 @@
                 }
             });
 
-            // Place the camera inside the model
-            camera.position.copy(center).multiplyScalar(scale);
-            //camera.position.y += 0.5; // Add a small offset to keep the camera above the ground
+            // Set the camera position to the origin of the model
+            camera.position.set(0, 0, 0);
 
-            // Make the camera look at the center of the model
-            camera.lookAt(center.multiplyScalar(scale));
+            // Make the camera look at a point in front of it (e.g., along the negative Z - axis)
+            camera.lookAt(0, 0, -1);
             
         }, (progress) => {
             // Show loading progress
