@@ -134,13 +134,13 @@
             model.scale.set(scale, scale, scale);
             
             // Position slightly above ground and move forward (negative Z - axis)
-            model.position.set(0, 0.5, 0); // Adjust Z value to move forward/backward
+            model.position.set(0, 1, 0); // Adjust Z value to move forward/backward
 
             // Flip the model upside - down by rotating it 180 degrees around the X - axis
-            model.rotation.x = Math.PI/2;
+            model.rotation.x = Math.PI;
 
             // Rotate the model 180 degrees about the Y - axis
-            model.rotation.y = Math.PI;
+            model.rotation.y = Math.PI/2;
             
             scene.add(model);
             hideLoading();
