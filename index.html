@@ -104,7 +104,7 @@
         // Load GLTF model with enhanced debugging
         const loader = new GLTFLoader();
         let model; // Declare model variable outside the loader callback
-        loader.load('models/final.glb', (gltf) => {
+        loader.load('models/simplified.glb', (gltf) => {
             model = gltf.scene;
             
             // Check if model has children
@@ -130,7 +130,7 @@
             model.position.sub(center); // Center model
             
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = Math.min(2 / maxDim, 1); // Ensure model fits in view
+            const scale = Math.min(5 / maxDim, 1); // Ensure model fits in view
             model.scale.set(scale, scale, scale);
             
             // Position slightly above ground and move forward (negative Z-axis)
